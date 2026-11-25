@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login Akun Dummy — DapurPintar (User, Operator, Admin)</title>
+  <link rel="icon" type="image/png" href="logo-icon.png" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body id="loginPageRoot">
+
+  <!-- Top Simulation Banner -->
+  <div class="sim-banner">
+    <strong>Mode Autentikasi Dummy Lokal:</strong> Gunakan akun dummy <strong>User</strong>, <strong>Operator</strong>, atau <strong>Admin</strong> di bawah ini untuk menguji hak akses halaman utama &amp; proteksi Halaman Dashboard.
+  </div>
+
+  <!-- Navbar -->
+  <header class="navbar">
+    <div class="nav-inner">
+      <a href="index.html" class="brand">
+        <span class="brand-badge">
+          <img src="logo-icon.png" alt="Logo DapurPintar" class="brand-logo-img" />
+        </span>
+        <div>
+          <span>dapur<span class="brand-accent">pintar</span></span>
+          <small>Portal Login Multi-Peran</small>
+        </div>
+      </a>
+
+      <nav class="nav-links" aria-label="Navigasi Halaman Login">
+        <a href="index.html">← Beranda Aplikasi</a>
+        <a href="dashboard.html" class="nav-dash-btn" id="loginNavDashLink">📊 Halaman Dashboard</a>
+      </nav>
+
+      <div class="nav-actions">
+        <div id="navUserWidget" class="nav-user-widget"></div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Login Content -->
+  <main class="container auth-page-wrap">
+    <div class="auth-grid" style="width:100%;">
+
+      <!-- Left Panel: Dummy Credentials for User, Operator, Admin -->
+      <section class="dummy-accounts-panel" style="border-bottom:4px solid var(--gold-500);">
+        <span class="hero-tag" style="margin-bottom:10px;">✦ Akun Simulasi / Dummy Siap Pakai</span>
+        <h1 style="font-family:var(--font-serif);font-size:clamp(1.65rem,2.6vw,2.2rem);line-height:1.2;margin-bottom:8px;">
+          Pilih Peran Login: <span style="color:var(--gold-400);">User, Operator, atau Admin</span>
+        </h1>
+        <p style="font-size:0.92rem;color:rgba(255,255,255,0.86);">
+          Klik tombol <strong>Isi Form</strong> untuk menyalin kredensial ke formulir login, atau klik <strong>Login Cepat</strong> untuk langsung masuk dan menguji pembatasan akses <strong>Halaman Dashboard</strong>.
+        </p>
+
+        <div class="dummy-cards-stack" id="dummyAccountsList">
+          <!-- Rendered dynamically from DUMMY_USERS in script.js -->
+        </div>
+
+        <div class="hero-note" style="margin-top:16px;">
+          <strong>Aturan Hak Akses Sistem:</strong><br/>
+          • <strong>User:</strong> Hanya dapat mengakses <em>Halaman Utama Aplikasi</em> (Stok Kulkas, Resep, Meal Plan, Belanja). Akses ke <em>Halaman Dashboard</em> ditolak otomatis.<br/>
+          • <strong>Operator:</strong> Dapat mengakses <em>Halaman Dashboard</em> (CRUD Stok, Resep, UMKM, Paket Meal Plan &amp; Verifikasi Halal) serta Halaman Utama.<br/>
+          • <strong>Admin:</strong> Akses penuh <em>Halaman Dashboard</em> + <em>Manajemen Akun Dummy, Log Login &amp; Reset Sistem</em>.
+        </div>
+      </section>
+
+      <!-- Right Panel: Login Form -->
+      <section class="login-form-card" style="border-bottom:none;">
+        <div id="activeSessionBox"></div>
+
+        <div class="auth-logo-hero">
+          <img src="logo-dapurpintar.png" alt="Logo DapurPintar Smart Kitchen" />
+        </div>
+
+        <span class="eyebrow">Autentikasi Pengguna</span>
+        <h2 style="font-family:var(--font-serif);color:var(--emerald-900);font-size:1.6rem;margin-bottom:6px;">Masuk ke DapurPintar</h2>
+        <p style="font-size:0.88rem;color:var(--neutral-500);margin-bottom:16px;">
+          Pilih tab peran di bawah atau masukkan username/email dan kata sandi akun dummy.
+        </p>
+
+        <!-- Role Preset Selector Tabs -->
+        <div class="role-tab-selector" role="tablist" aria-label="Pilih Peran Login">
+          <button type="button" class="role-tab-btn active" data-role-tab="user" onclick="selectRolePreset('user')">👤 User</button>
+          <button type="button" class="role-tab-btn" data-role-tab="operator" onclick="selectRolePreset('operator')">🛠 Operator</button>
+          <button type="button" class="role-tab-btn" data-role-tab="admin" onclick="selectRolePreset('admin')">👑 Admin</button>
+        </div>
+
+        <div id="loginAlertBox" class="auth-alert" role="alert"></div>
+
+        <form id="dummyLoginForm">
+          <div class="form-group">
+            <label for="loginUsername">Username atau Email</label>
+            <input type="text" id="loginUsername" class="input" placeholder="Contoh: user, operator, atau admin" required autocomplete="username" />
+          </div>
+
+          <div class="form-group">
+            <label for="loginPassword">Password Dummy</label>
+            <div class="pw-field-wrap">
+              <input type="password" id="loginPassword" class="input" placeholder="Masukkan password..." required autocomplete="current-password" />
+              <button type="button" class="pw-toggle-btn" id="btnTogglePw">Lihat</button>
+            </div>
+          </div>
+
+          <div class="form-group" style="display:flex;justify-content:space-between;align-items:center;font-size:0.82rem;color:var(--neutral-500);margin-top:8px;">
+            <span id="selectedRoleHint">Peran terpilih: <strong>User (Akses Beranda)</strong></span>
+            <button type="button" class="btn btn-outline btn-sm" onclick="fillSelectedRoleCredentials()">Isi Otomatis</button>
+          </div>
+
+          <button type="submit" class="btn btn-primary" style="width:100%;padding:12px;font-size:0.96rem;margin-top:6px;">
+            🔐 Masuk ke Sistem
+          </button>
+        </form>
+
+        <div style="margin-top:18px;padding-top:16px;border-top:1px solid var(--neutral-200);display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;font-size:0.83rem;">
+          <span style="color:var(--neutral-500);">Ingin melihat aplikasi tanpa login?</span>
+          <a href="index.html" class="btn btn-outline btn-sm">Lanjut ke Beranda →</a>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <footer>
+    <div class="container" style="display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;">
+      <div>
+        <div class="footer-brand-row">
+          <span class="footer-logo-wrap">
+            <img src="logo-dapurpintar.png" alt="Logo DapurPintar Smart Kitchen" />
+          </span>
+          <strong style="color:var(--gold-400);">DapurPintar — Sistem Login Dummy Multi-Role</strong>
+        </div>
+        <p style="margin-top:4px;">Mendukung peran <strong>User</strong>, <strong>Operator</strong>, dan <strong>Admin</strong> menggunakan penyimpanan sesi browser (localStorage).</p>
+      </div>
+      <div style="text-align:right;">
+        <a href="index.html" style="color:var(--gold-400);font-weight:700;">Beranda Utama</a> &nbsp;•&nbsp;
+        <a href="dashboard.html" style="color:var(--gold-400);font-weight:700;">Halaman Dashboard</a>
+      </div>
+    </div>
+  </footer>
+
+  <div class="toast" id="appToast" role="status" aria-live="polite"></div>
+  <script src="script.js"></script>
+</body>
+</html>

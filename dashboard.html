@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Halaman Dashboard (Operator & Admin) — DapurPintar</title>
+  <link rel="icon" type="image/png" href="logo-icon.png" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body id="dashboardPageRoot">
+
+  <!-- Top Notice -->
+  <div class="sim-banner">
+    <strong>Area Terproteksi Role-Based Access Control (RBAC):</strong> Halaman Dashboard ini <strong>hanya dapat diakses oleh Operator dan Admin</strong>. Perubahan data otomatis tersinkronisasi ke halaman utama.
+  </div>
+
+  <!-- Navbar -->
+  <header class="navbar">
+    <div class="nav-inner">
+      <a href="index.html" class="brand">
+        <span class="brand-badge">
+          <img src="logo-icon.png" alt="Logo DapurPintar" class="brand-logo-img" />
+        </span>
+        <div>
+          <span>dapur<span class="brand-accent">pintar</span></span>
+          <small>Dashboard Operator &amp; Admin</small>
+        </div>
+      </a>
+
+      <nav class="nav-links" id="dashProtectedNavLinks" aria-label="Navigasi Dashboard">
+        <a href="index.html">🏠 Lihat Halaman Pengguna</a>
+        <a href="#kpiSection">Ringkasan KPI</a>
+        <a href="#verifikasiSection">Verifikasi Halal <span class="pill-count" id="dashUnverifiedBadge">0</span></a>
+        <a href="#crudSection">Kelola Data CRUD</a>
+      </nav>
+
+      <div class="nav-actions">
+        <div id="navUserWidget" class="nav-user-widget"></div>
+      </div>
+    </div>
+  </header>
+
+  <!-- 1. BLOCKED / ACCESS DENIED CONTAINER (Shown automatically for Guest or regular 'User') -->
+  <div id="dashboardAccessDenied" style="display:none;"></div>
+
+  <!-- 2. PROTECTED DASHBOARD CONTENT (Shown ONLY when logged in as 'operator' or 'admin') -->
+  <div id="dashboardProtectedContent" style="display:none;">
+
+    <!-- Dashboard Role Header -->
+    <div class="dash-header-banner">
+      <div class="container dash-role-bar">
+        <div>
+          <span class="hero-tag" id="dashRoleBadgeHeader" style="margin-bottom:10px;">✦ Panel Manajemen Terpadu</span>
+          <h1 style="font-family:var(--font-serif);font-size:clamp(1.65rem,2.8vw,2.35rem);line-height:1.18;" id="dashWelcomeTitle">
+            Dashboard Operasional &amp; Administrasi
+          </h1>
+          <p style="color:rgba(255,255,255,0.85);font-size:0.93rem;margin-top:6px;max-width:680px;" id="dashRoleDesc">
+            Kelola inventaris stok master, katalog resep anti-mubazir, verifikasi status halal mitra UMKM, dan paket meal plan.
+          </p>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <a href="index.html" class="btn btn-gold">🏠 Buka Tampilan Aplikasi Utama</a>
+          <button type="button" class="btn btn-outline" style="background:rgba(255,255,255,0.12);color:#fff;border-color:rgba(255,255,255,0.35);" id="btnExportJson">⬇ Ekspor Backup JSON</button>
+          <button type="button" class="btn btn-danger" id="btnResetAllDemo" style="display:none;">↺ Reset Sistem Awal (Admin)</button>
+        </div>
+      </div>
+    </div>
+
+    <main class="container" style="padding-top:26px;padding-bottom:48px;">
+
+      <!-- Quick Role Testing Bar -->
+      <div class="role-QuickSwitch-bar">
+        <div>
+          <strong>Mode Pengujian Cepat Hak Akses:</strong> Coba beralih peran secara instan untuk menguji perbedaan tampilan <em>Admin</em>, <em>Operator</em>, dan blokir akses pada <em>User</em>:
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button type="button" class="btn btn-outline btn-sm" onclick="quickSwitchDummyRole('admin')">👑 Simulasi Admin</button>
+          <button type="button" class="btn btn-outline btn-sm" onclick="quickSwitchDummyRole('operator')">🛠 Simulasi Operator</button>
+          <button type="button" class="btn btn-danger btn-sm" onclick="quickSwitchDummyRole('user')">👤 Uji sebagai User (Akan Diblokir)</button>
+        </div>
+      </div>
+
+      <!-- KPI Overview -->
+      <section id="kpiSection" style="padding-top:6px;padding-bottom:28px;">
+        <div class="dash-kpi-grid" id="dashKpiGrid"></div>
+      </section>
+
+      <!-- Operator & Admin Halal / Food Verification Queue -->
+      <section id="verifikasiSection" style="padding:28px 0;">
+        <div class="section-header" style="margin-bottom:12px;">
+          <div>
+            <span class="eyebrow">Tugas Operator &amp; Admin</span>
+            <h2 class="section-title" style="font-size:1.5rem;">Antrean Verifikasi Status Halal Bahan &amp; UMKM</h2>
+            <p class="section-sub">Item di bawah ini masih berstatus <em>"Belum Diverifikasi Resmi"</em>. Operator dan Admin dapat memperbarui klasifikasi verifikasinya secara cepat.</p>
+          </div>
+        </div>
+        <div id="verificationQueueContainer"></div>
+      </section>
+
+      <!-- Full CRUD Management (Stok, Resep, UMKM, Paket, + Admin-Only Akun Dummy) -->
+      <section id="crudSection" style="padding:28px 0;border-bottom:none;">
+        <div class="section-header">
+          <div>
+            <span class="eyebrow">Manajemen Basis Data Lokal (localStorage)</span>
+            <h2 class="section-title" style="font-size:1.65rem;">Panel CRUD Master DapurPintar</h2>
+            <p class="section-sub" id="crudPermSubtitle">Operator dapat mengelola 4 koleksi operasional. Manajemen Akun Dummy &amp; Log Login dikhususkan untuk Admin.</p>
+          </div>
+        </div>
+
+        <div class="crud-tabs" role="tablist">
+          <button type="button" class="crud-tab active" data-tab="stok" onclick="switchCrudTab('stok')">1. Stok Bahan (<span id="crudCountStok">0</span>)</button>
+          <button type="button" class="crud-tab" data-tab="resep" onclick="switchCrudTab('resep')">2. Katalog Resep (<span id="crudCountResep">0</span>)</button>
+          <button type="button" class="crud-tab" data-tab="umkm" onclick="switchCrudTab('umkm')">3. Mitra UMKM (<span id="crudCountUmkm">0</span>)</button>
+          <button type="button" class="crud-tab" data-tab="paket" onclick="switchCrudTab('paket')">4. Paket Meal Plan (<span id="crudCountPaket">0</span>)</button>
+          <button type="button" class="crud-tab" id="crudTabUsersBtn" data-tab="users" onclick="switchCrudTab('users')">5. Akun Pengguna (<span id="crudCountUsers">0</span>)</button>
+        </div>
+
+        <div class="crud-grid">
+          <div class="panel-card">
+            <h3 id="crudFormTitle" style="color:var(--emerald-900);margin-bottom:12px;font-size:1.05rem;">Form Data</h3>
+            <form id="crudForm"></form>
+          </div>
+          <div class="panel-card">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:10px;flex-wrap:wrap;">
+              <h3 style="color:var(--emerald-900);font-size:1.05rem;">Tabel Data Tersimpan</h3>
+              <input type="search" id="crudTableSearch" class="input" style="max-width:240px;" placeholder="Filter tabel..." />
+            </div>
+            <div class="table-wrap" id="crudTableContainer"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Admin-Only Activity Log Section -->
+      <section id="adminLogSection" style="padding:24px 0 0;border-bottom:none;display:none;">
+        <div class="panel-card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:10px;flex-wrap:wrap;">
+            <div>
+              <span class="eyebrow">Khusus Administrator</span>
+              <h3 style="color:var(--emerald-900);font-size:1.15rem;">Riwayat Aktivitas Login &amp; Sistem</h3>
+            </div>
+            <button type="button" class="btn btn-outline btn-sm" onclick="clearAuthLogs()">Bersihkan Log</button>
+          </div>
+          <div class="log-table-box" id="adminLogContainer"></div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <footer>
+    <div class="container" style="display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;">
+      <div>
+        <div class="footer-brand-row">
+          <span class="footer-logo-wrap">
+            <img src="logo-dapurpintar.png" alt="Logo DapurPintar Smart Kitchen" />
+          </span>
+          <strong style="color:var(--gold-400);">DapurPintar — Protected Dashboard (Operator &amp; Admin)</strong>
+        </div>
+        <p style="margin-top:4px;">Dilindungi kontrol akses berbasis peran (RBAC) sisi klien. Akun dengan peran User ditolak otomatis pada halaman ini.</p>
+      </div>
+      <div style="text-align:right;">
+        <a href="index.html" style="color:var(--gold-400);font-weight:700;">Beranda Aplikasi</a> &nbsp;•&nbsp;
+        <a href="login.html" style="color:var(--gold-400);font-weight:700;">Halaman Login</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Modal for Photo Upload on Dashboard -->
+  <div class="modal-backdrop" id="appModal" role="dialog" aria-modal="true">
+    <div class="modal-content">
+      <button type="button" class="modal-close" onclick="closeModal()" aria-label="Tutup">✕</button>
+      <div id="modalBody"></div>
+    </div>
+  </div>
+
+  <div class="toast" id="appToast" role="status" aria-live="polite"></div>
+  <script src="script.js"></script>
+</body>
+</html>

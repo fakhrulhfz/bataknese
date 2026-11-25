@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DapurPintar — Asisten Stok Bahan &amp; Resep Anti-Mubazir</title>
+  <link rel="icon" type="image/png" href="logo-icon.png" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body id="mainAppRoot">
+
+  <!-- Top Ethical & Simulation Transparency Notice -->
+  <div class="sim-banner" id="simBanner">
+    <strong>Mode Prototipe &amp; Transparansi Pangan:</strong> Estimasi harga, kontak WhatsApp UMKM, akun login dummy, dan templat struk adalah <strong>data simulasi nonpribadi</strong>. Selalu cek kondisi fisik bahan &amp; bedakan <em>Bahan Segar Alami</em> dari <em>Sertifikasi Halal Resmi</em>.
+  </div>
+
+  <!-- Sticky Navigation -->
+  <header class="navbar">
+    <div class="nav-inner">
+      <a href="#top" class="brand">
+        <span class="brand-badge">
+          <img src="logo-icon.png" alt="Logo DapurPintar" class="brand-logo-img" />
+        </span>
+        <div>
+          <span>dapur<span class="brand-accent">pintar</span></span>
+          <small id="navTagline">Anti-Mubazir &amp; Kuliner Halal</small>
+        </div>
+      </a>
+
+      <nav class="nav-links" aria-label="Navigasi Utama">
+        <a href="#stokSection"><span data-i18n="navStock">Stok &amp; Zona</span> <span class="pill-count danger" id="navExpiringBadge">0</span></a>
+        <a href="#resepSection"><span data-i18n="navRecipes">Resep Pintar</span></a>
+        <a href="#plannerSection"><span data-i18n="navPlanner">Meal Plan &amp; Anggaran</span></a>
+        <a href="#belanjaSection"><span data-i18n="navMarket">Belanja &amp; UMKM</span> <span class="pill-count" id="navShopBadge">0</span></a>
+        <a href="dashboard.html" class="nav-dash-btn" id="mainNavDashLink">📊 Dashboard</a>
+      </nav>
+
+      <div class="nav-actions">
+        <button class="btn btn-outline btn-sm" id="btnToggleFavFilter" title="Lihat Item Favorit">
+          ♥ <span data-i18n="navFav">Favorit</span> (<span id="navFavBadge">0</span>)
+        </button>
+        <div class="lang-toggle" role="group" aria-label="Pilihan Bahasa">
+          <button type="button" id="langID" class="active">ID</button>
+          <button type="button" id="langEN">EN</button>
+        </div>
+        <div id="navUserWidget" class="nav-user-widget"></div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <div class="hero" id="top">
+    <div class="container hero-grid">
+      <div>
+        <div class="hero-tag" data-i18n="heroBadge">✦ Eco-Fresh Halal Kitchen • Nusantara Edition</div>
+        <h1 id="heroTitle">Kelola Stok Kulkas, <span>Selamatkan Bahan</span> Sebelum Mubazir.</h1>
+        <p id="heroDesc">
+          Catat belanjaan dalam hitungan detik, pantau pengingat kedaluwarsa di 5 zona dapur, temukan resep lezat dari bahan yang sudah ada, dan susun anggaran makan hemat tanpa sampah makanan.
+        </p>
+        <div class="hero-cta">
+          <a href="#resepSection" class="btn btn-gold" data-i18n="ctaFindRecipe">Cari Resep dari Stok Kulkas</a>
+          <button type="button" class="btn btn-outline" style="background:rgba(255,255,255,0.12);color:#fff;border-color:rgba(255,255,255,0.35);" id="btnHeroOpenScanner" data-i18n="ctaScanReceipt">
+            + Scan Struk / Input Cepat
+          </button>
+          <a href="login.html" class="btn btn-outline" style="background:rgba(234,179,75,0.16);color:var(--gold-400);border-color:rgba(234,179,75,0.55);" id="heroAuthBtn">
+            🔐 Portal Login (User / Operator / Admin)
+          </a>
+        </div>
+      </div>
+
+      <aside class="hero-stats-card" aria-label="Ringkasan Kesehatan Stok Dapur">
+        <div class="hero-photo-frame" id="heroPhotoContainer"></div>
+        <div class="hero-stats-title">
+          <span data-i18n="statsTitle">Monitor Kesehatan Dapur Hari Ini</span>
+          <span id="todayDateLabel" style="font-weight:600;color:#fff;opacity:0.85;"></span>
+        </div>
+        <div class="stats-grid">
+          <div class="stat-box">
+            <div class="num" id="statTotalStock">0</div>
+            <div class="lbl" data-i18n="statTotalLbl">Total Jenis Bahan Aktif</div>
+          </div>
+          <div class="stat-box warn">
+            <div class="num" id="statExpiringSoon">0</div>
+            <div class="lbl" data-i18n="statWarnLbl">Segera Olah (1–3 Hari)</div>
+          </div>
+          <div class="stat-box danger">
+            <div class="num" id="statExpired">0</div>
+            <div class="lbl" data-i18n="statExpLbl">Melewati Batas Simpan</div>
+          </div>
+          <div class="stat-box">
+            <div class="num" id="statRescueValue">Rp 0</div>
+            <div class="lbl" data-i18n="statRescueLbl">Nilai Bahan Kritis Terselamatkan</div>
+          </div>
+        </div>
+        <div class="hero-note" data-i18n="heroSafetyNote">
+          Info: Tanggal bertanda "Estimasi Referensi" dihitung dari rata-rata umur simpan pangan rumah tangga. Selalu periksa aroma, warna, dan tekstur sebelum dimasak.
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <main class="container">
+
+    <!-- Active Role Status Strip on Home Page -->
+    <div id="homeRoleStrip" style="margin-top:26px;"></div>
+
+    <!-- SECTION 1: DENAH SVG ZONA DAPUR + STOK BAHAN + SCAN STRUK -->
+    <section id="stokSection">
+      <div class="section-header">
+        <div>
+          <span class="eyebrow" data-i18n="sec1Eyebrow">Inventaris &amp; Peringatan Dini</span>
+          <h2 class="section-title" data-i18n="sec1Title">Denah 5 Zona Dapur &amp; Stok Bahan Pangan</h2>
+          <p class="section-sub" data-i18n="sec1Sub">Klik zona pada denah SVG untuk memfilter isi penyimpanan, atau gunakan simulasi Scan Struk Belanja untuk mencatat bahan baru secara otomatis.</p>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button type="button" class="btn btn-gold" id="btnToggleScanner" data-i18n="btnScanToggle">🧾 Simulasi Scan Struk Cepat</button>
+          <button type="button" class="btn btn-outline" onclick="openQuickAddStockModal()" data-i18n="btnAddManualStock">+ Tambah Bahan Manual</button>
+        </div>
+      </div>
+
+      <!-- Collapsible Receipt Scanner Simulation -->
+      <div class="scanner-panel" id="scannerPanel" style="display:none;">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;">
+          <div>
+            <h3 style="color:var(--emerald-900);font-size:1.08rem;" data-i18n="scannerTitle">Simulasi Scan Struk Belanja (Mode Demo Lokal)</h3>
+            <p style="font-size:0.85rem;color:var(--neutral-500);" data-i18n="scannerSub">Pilih contoh struk atau ketik daftar belanjaan (1 baris per bahan, misal: <code>Bayam Hijau | 2 | ikat</code> atau <code>Telur Ayam 6 butir</code>). Umur simpan otomatis diestimasi.</p>
+          </div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;">
+            <button type="button" class="btn btn-outline btn-sm" onclick="loadSampleReceipt('pasar')">Struk Pasar Pagi</button>
+            <button type="button" class="btn btn-outline btn-sm" onclick="loadSampleReceipt('kos')">Struk Minimarket Kos</button>
+            <button type="button" class="btn btn-outline btn-sm" onclick="loadSampleReceipt('keluarga')">Struk Mingguan Keluarga</button>
+          </div>
+        </div>
+        <div class="scanner-grid">
+          <div>
+            <textarea id="receiptTextarea" rows="5" class="input" placeholder="Contoh:&#10;Kangkung Segar | 2 | ikat&#10;Tahu Putih | 1 | bungkus&#10;Susu UHT Full Cream | 1 | kotak"></textarea>
+          </div>
+          <div style="display:flex;flex-direction:column;justify-content:space-between;gap:10px;">
+            <div style="font-size:0.83rem;color:var(--neutral-700);background:var(--white);padding:12px;border-radius:10px;border:1px solid var(--neutral-200);">
+              <strong>Catatan Transparansi:</strong> Bahan hasil ekstraksi struk otomatis diberi label <em>"Estimasi Referensi"</em> (bukan tanggal kemasan resmi) dan status halal sesuai klasifikasi bahan mentah/kemasan umum. Pengelolaan katalog penuh tersedia di <strong>Halaman Dashboard (Operator &amp; Admin)</strong>.
+            </div>
+            <div style="display:flex;gap:10px;justify-content:flex-end;">
+              <button type="button" class="btn btn-outline" onclick="document.getElementById('scannerPanel').style.display='none'">Tutup</button>
+              <button type="button" class="btn btn-primary" id="btnProcessReceipt">Ekstrak &amp; Masukkan ke Stok Dapur</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Interactive SVG Kitchen Storage Map -->
+      <div class="kitchen-map-wrap">
+        <div class="svg-map-box">
+          <svg id="kitchenSvgMap" viewBox="0 0 680 310" role="img" aria-label="Denah Interaktif 5 Zona Penyimpanan Dapur">
+            <defs>
+              <pattern id="gridPat" width="20" height="20" patternUnits="userSpaceOnUse">
+                <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#dcebe5" stroke-width="0.8"/>
+              </pattern>
+            </defs>
+            <rect width="680" height="310" fill="url(#gridPat)" />
+            <text x="20" y="26" fill="#083a2c" font-size="13" font-weight="800">DENAH INTERAKTIF ZONA SIMPAN DAPUR (KLIK UNTUK FILTER)</text>
+
+            <!-- Zone 1: Freezer -->
+            <g class="zone-node" data-zone="Freezer" onclick="selectZoneFromMap('Freezer')">
+              <rect class="zone-bg" x="20" y="42" width="190" height="115" rx="14" fill="#dff3f9" stroke="#138a84" stroke-width="2.2"/>
+              <text x="36" y="70" fill="#083a2c" font-size="14" font-weight="800">❄ Freezer (-18°C)</text>
+              <text x="36" y="90" fill="#374b43" font-size="11">Daging beku, kaldu, stok panjang</text>
+              <rect x="36" y="112" width="158" height="28" rx="8" fill="#ffffff"/>
+              <text id="svgCount-Freezer" x="46" y="130" fill="#0c4f3d" font-size="12" font-weight="700">0 bahan</text>
+            </g>
+
+            <!-- Zone 2: Chiller Kulkas -->
+            <g class="zone-node" data-zone="Chiller Kulkas" onclick="selectZoneFromMap('Chiller Kulkas')">
+              <rect class="zone-bg" x="20" y="170" width="190" height="122" rx="14" fill="#e3f6ef" stroke="#0f684f" stroke-width="2.2"/>
+              <text x="36" y="198" fill="#083a2c" font-size="14" font-weight="800">🧊 Chiller Kulkas (2–5°C)</text>
+              <text x="36" y="218" fill="#374b43" font-size="11">Sayur daun, ayam segar, susu, tahu</text>
+              <rect x="36" y="244" width="158" height="30" rx="8" fill="#ffffff"/>
+              <text id="svgCount-Chiller" x="46" y="263" fill="#0c4f3d" font-size="12" font-weight="700">0 bahan</text>
+            </g>
+
+            <!-- Zone 3: Rak Kering / Pantry -->
+            <g class="zone-node" data-zone="Rak Kering / Pantry" onclick="selectZoneFromMap('Rak Kering / Pantry')">
+              <rect class="zone-bg" x="232" y="42" width="215" height="122" rx="14" fill="#fdf4df" stroke="#d49a2a" stroke-width="2.2"/>
+              <text x="248" y="70" fill="#083a2c" font-size="14" font-weight="800">🌾 Rak Kering / Pantry</text>
+              <text x="248" y="90" fill="#374b43" font-size="11">Beras, mi, sarden, tepung, minyak</text>
+              <rect x="248" y="116" width="182" height="28" rx="8" fill="#ffffff"/>
+              <text id="svgCount-Pantry" x="258" y="134" fill="#0c4f3d" font-size="12" font-weight="700">0 bahan</text>
+            </g>
+
+            <!-- Zone 4: Meja Dapur / Suhu Ruang -->
+            <g class="zone-node" data-zone="Meja Dapur / Suhu Ruang" onclick="selectZoneFromMap('Meja Dapur / Suhu Ruang')">
+              <rect class="zone-bg" x="232" y="178" width="215" height="114" rx="14" fill="#f3f7ee" stroke="#5a8f49" stroke-width="2.2"/>
+              <text x="248" y="206" fill="#083a2c" font-size="14" font-weight="800">🍅 Meja Dapur (Suhu Ruang)</text>
+              <text x="248" y="226" fill="#374b43" font-size="11">Telur harian, pisang, tomat, roti</text>
+              <rect x="248" y="248" width="182" height="28" rx="8" fill="#ffffff"/>
+              <text id="svgCount-Meja" x="258" y="266" fill="#0c4f3d" font-size="12" font-weight="700">0 bahan</text>
+            </g>
+
+            <!-- Zone 5: Rak Bumbu -->
+            <g class="zone-node" data-zone="Rak Bumbu" onclick="selectZoneFromMap('Rak Bumbu')">
+              <rect class="zone-bg" x="468" y="42" width="192" height="250" rx="14" fill="#f9efe6" stroke="#b7791f" stroke-width="2.2"/>
+              <text x="484" y="72" fill="#083a2c" font-size="14" font-weight="800">🧄 Rak Bumbu &amp; Rempah</text>
+              <text x="484" y="94" fill="#374b43" font-size="11">Bawang, cabai kering, kecap,</text>
+              <text x="484" y="110" fill="#374b43" font-size="11">rempah Nusantara &amp; saus</text>
+              <circle cx="564" cy="175" r="34" fill="#fff8eb" stroke="#eab34b" stroke-width="2"/>
+              <path d="M552 178c6-16 18-16 24 0c-6 10-18 10-24 0z" fill="#d49a2a"/>
+              <rect x="484" y="246" width="160" height="30" rx="8" fill="#ffffff"/>
+              <text id="svgCount-Bumbu" x="494" y="265" fill="#0c4f3d" font-size="12" font-weight="700">0 bahan</text>
+            </g>
+          </svg>
+        </div>
+
+        <div class="map-side-info">
+          <div>
+            <h3 style="font-size:1.05rem;color:var(--emerald-900);margin-bottom:8px;" data-i18n="zoneFilterTitle">Filter Cepat Zona Penyimpanan</h3>
+            <p style="font-size:0.86rem;color:var(--neutral-500);margin-bottom:12px;" id="activeZoneCaption">Menampilkan seluruh 5 zona dapur. Klik denah atau tombol di bawah untuk fokus pada satu area.</p>
+            <div class="zone-pills" id="zoneQuickPills"></div>
+          </div>
+
+          <div class="maps-shortcut-card">
+            <h4 data-i18n="mapsCardTitle">📍 Cari Pasar Segar &amp; Toko Pangan Terdekat (Google Maps)</h4>
+            <p style="font-size:0.81rem;color:var(--neutral-700);" data-i18n="mapsCardDesc">Tautan eksternal standar tanpa API key untuk mencari pasokan bahan segar di sekitar Anda:</p>
+            <div class="maps-links">
+              <a class="btn btn-outline btn-sm" href="https://www.google.com/maps/search/?api=1&query=Pasar+Tradisional+Sayur+Segar+Terdekat" target="_blank" rel="noopener noreferrer">Pasar Tradisional ↗</a>
+              <a class="btn btn-outline btn-sm" href="https://www.google.com/maps/search/?api=1&query=Toko+Bahan+Makanan+Halal+Terdekat" target="_blank" rel="noopener noreferrer">Toko Pangan Halal ↗</a>
+              <a class="btn btn-outline btn-sm" href="https://www.google.com/maps/search/?api=1&query=Supermarket+Sayur+dan+Buah+Terdekat" target="_blank" rel="noopener noreferrer">Supermarket ↗</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stock Filter Bar -->
+      <div class="filter-bar">
+        <input type="search" id="stockSearch" class="input" placeholder="Cari nama bahan di dapur (mis. bayam, ayam, susu)..." />
+        <select id="stockCategoryFilter">
+          <option value="ALL">Semua Kategori Bahan</option>
+          <option value="Sayur & Buah">Sayur &amp; Buah</option>
+          <option value="Protein Hewani">Protein Hewani</option>
+          <option value="Protein Nabati & Telur">Protein Nabati &amp; Telur</option>
+          <option value="Susu & Olahan">Susu &amp; Olahan</option>
+          <option value="Bumbu & Rempah">Bumbu &amp; Rempah</option>
+          <option value="Bahan Pokok & Kering">Bahan Pokok &amp; Kering</option>
+        </select>
+        <select id="stockStatusFilter">
+          <option value="ALL">Semua Status Kesegaran</option>
+          <option value="WARN">Segera Olah (1–3 Hari)</option>
+          <option value="EXPIRED">Sudah Kedaluwarsa (≤ 0 Hari)</option>
+          <option value="FRESH">Masih Segar (&gt; 3 Hari)</option>
+        </select>
+        <select id="stockSort">
+          <option value="EXP_ASC">Urutkan: Tercepat Kedaluwarsa</option>
+          <option value="VAL_DESC">Urutkan: Nilai Ekonomi Tertinggi</option>
+          <option value="NAME_ASC">Urutkan: Nama Bahan (A–Z)</option>
+        </select>
+        <button type="button" class="btn btn-outline" id="btnResetStockFilter">Reset</button>
+      </div>
+
+      <div class="cards-grid" id="stockGrid"></div>
+    </section>
+
+    <!-- SECTION 2: KATALOG 12+ RESEP ANTI-MUBAZIR -->
+    <section id="resepSection">
+      <div class="section-header">
+        <div>
+          <span class="eyebrow" data-i18n="sec2Eyebrow">Rekomendasi Berbasis Inventaris</span>
+          <h2 class="section-title" data-i18n="sec2Title">Katalog Resep Anti-Mubazir</h2>
+          <p class="section-sub" data-i18n="sec2Sub">Sistem otomatis mencocokkan resep dengan stok dapur Anda dan memprioritaskan masakan yang menyelamatkan bahan kritis (1–3 hari menjelang kedaluwarsa).</p>
+        </div>
+        <div id="activeIngredientFilterBanner" style="display:none;align-items:center;gap:8px;background:var(--gold-100);padding:8px 14px;border-radius:999px;border:1px solid var(--gold-500);font-size:0.84rem;font-weight:700;">
+          <span id="activeIngredientFilterText"></span>
+          <button type="button" class="btn btn-sm btn-outline" onclick="clearIngredientRecipeFilter()">✕ Hapus</button>
+        </div>
+      </div>
+
+      <div class="filter-bar">
+        <input type="search" id="recipeSearch" class="input" placeholder="Cari resep atau bahan (mis. tumis, bayam, ayam, sarden)..." />
+        <select id="recipeCategoryFilter">
+          <option value="ALL">Semua Kategori Masakan</option>
+          <option value="Tumisan Cepat">Tumisan Cepat</option>
+          <option value="Sup & Berkuah">Sup &amp; Berkuah</option>
+          <option value="Lauk Nusantara">Lauk Nusantara</option>
+          <option value="Sarapan & Camilan">Sarapan &amp; Camilan</option>
+          <option value="Olahan Penyelamat Stok">Olahan Penyelamat Stok</option>
+          <option value="Menu Hemat Kos">Menu Hemat Kos</option>
+        </select>
+        <select id="recipeZoneFilter">
+          <option value="ALL">Semua Zona Asal Bahan</option>
+          <option value="Chiller Kulkas">Dominan Chiller Kulkas</option>
+          <option value="Freezer">Dominan Freezer</option>
+          <option value="Rak Kering / Pantry">Dominan Rak Kering / Pantry</option>
+          <option value="Meja Dapur / Suhu Ruang">Dominan Meja Dapur</option>
+          <option value="Rak Bumbu">Dominan Rak Bumbu</option>
+        </select>
+        <select id="recipeSort">
+          <option value="RESCUE_DESC">Prioritas Penyelamat Kulkas</option>
+          <option value="MATCH_DESC">Kecocokan Stok Tertinggi (%)</option>
+          <option value="COST_ASC">Estimasi Biaya Termurah</option>
+          <option value="TIME_ASC">Waktu Masak Tercepat</option>
+          <option value="NAME_ASC">Nama Masakan (A–Z)</option>
+        </select>
+        <button type="button" class="btn btn-outline" id="btnResetRecipeFilter">Reset</button>
+      </div>
+
+      <div class="cards-grid" id="recipeGrid"></div>
+    </section>
+
+    <!-- SECTION 3: REKOMENDASI PAKET RULE-BASED + MEAL PLANNER 1-5 HARI + KALKULATOR ANGGARAN -->
+    <section id="plannerSection">
+      <div class="section-header">
+        <div>
+          <span class="eyebrow" data-i18n="sec3Eyebrow">Perencana Masak &amp; Anggaran Pintar</span>
+          <h2 class="section-title" data-i18n="sec3Title">Rekomendasi Paket &amp; Meal Planner (1–5 Hari)</h2>
+          <p class="section-sub" data-i18n="sec3Sub">Gunakan penyaring berbasis aturan (rule-based) sesuai minat &amp; anggaran, atau susun sendiri jadwal masak 1–5 hari beserta kalkulasi penghematan stok dapur.</p>
+        </div>
+      </div>
+
+      <!-- Rule-Based Package Recommender -->
+      <div class="panel-card" style="margin-bottom:24px;background:linear-gradient(135deg,#ffffff,#f4faf7);">
+        <h3 style="color:var(--emerald-900);margin-bottom:6px;font-size:1.1rem;" data-i18n="recBoxTitle">✨ Rekomendasi Paket Meal Plan (Rule-Based Filtering)</h3>
+        <p style="font-size:0.86rem;color:var(--neutral-500);margin-bottom:14px;">Pilih gaya makan dan batas anggaran untuk menemukan paket menu yang paling hemat serta paling banyak memakai stok dapur Anda.</p>
+        <div class="filter-bar" style="margin-bottom:16px;grid-template-columns:1.2fr 1fr 1fr auto;">
+          <select id="pkgInterestFilter">
+            <option value="ALL">Semua Profil Minat</option>
+            <option value="Penyelamat Isi Kulkas">Penyelamat Isi Kulkas</option>
+            <option value="Hemat Anak Kos">Hemat Anak Kos</option>
+            <option value="Keluarga Seimbang">Keluarga Seimbang</option>
+            <option value="Masak Kilat <20 Menit">Masak Kilat &lt;20 Menit</option>
+          </select>
+          <select id="pkgMaxBudget">
+            <option value="9999999">Batas Anggaran: Tanpa Batas</option>
+            <option value="60000">Maksimal Rp 60.000</option>
+            <option value="100000">Maksimal Rp 100.000</option>
+            <option value="160000">Maksimal Rp 160.000</option>
+            <option value="250000">Maksimal Rp 250.000</option>
+          </select>
+          <select id="pkgMaxDays">
+            <option value="5">Durasi Maks: s.d. 5 Hari</option>
+            <option value="2">Durasi Maks: s.d. 2 Hari</option>
+            <option value="3">Durasi Maks: s.d. 3 Hari</option>
+          </select>
+          <button type="button" class="btn btn-outline" onclick="resetPkgFilters()">Reset Filter</button>
+        </div>
+        <div class="cards-grid" id="pkgGrid"></div>
+      </div>
+
+      <!-- 1-5 Day Meal Planner & Live Budget Calculator -->
+      <div class="planner-layout">
+        <div class="panel-card">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px;">
+            <h3 style="color:var(--emerald-900);font-size:1.12rem;" data-i18n="plannerFormTitle">Penyusun Jadwal Masak Harian (1–5 Hari)</h3>
+            <button type="button" class="btn btn-outline btn-sm" id="btnAutoFillPlanner">⚡ Isi Otomatis dari Stok Kritis</button>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="planName">Nama Rencana Masak</label>
+              <input type="text" id="planName" class="input" value="Rencana Masak Hemat Anti-Mubazir" />
+            </div>
+            <div class="form-group">
+              <label for="planStartDate">Tanggal Mulai</label>
+              <input type="date" id="planStartDate" class="input" />
+            </div>
+          </div>
+
+          <div class="form-row" style="grid-template-columns:1fr 1fr 1fr;">
+            <div class="form-group">
+              <label for="planDays">Durasi (1–5 Hari)</label>
+              <select id="planDays">
+                <option value="1">1 Hari</option>
+                <option value="2">2 Hari</option>
+                <option value="3" selected>3 Hari</option>
+                <option value="4">4 Hari</option>
+                <option value="5">5 Hari</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="planPeople">Jumlah Orang / Porsi Makan</label>
+              <input type="number" id="planPeople" class="input" min="1" max="12" value="2" />
+            </div>
+            <div class="form-group">
+              <label for="planExtraBudget">Cadangan Bumbu/Gas (Rp Simulasi)</label>
+              <input type="number" id="planExtraBudget" class="input" min="0" step="5000" value="15000" />
+            </div>
+          </div>
+
+          <div id="plannerDaysContainer"></div>
+        </div>
+
+        <!-- Live Budget & Anti-Waste Calculator -->
+        <aside class="budget-summary-box" aria-label="Kalkulator Estimasi Anggaran">
+          <span class="eyebrow" style="background:rgba(234,179,75,0.2);color:var(--gold-400);">Simulasi Anggaran</span>
+          <h3 style="font-size:1.25rem;margin-bottom:14px;" data-i18n="calcTitle">Kalkulator Anggaran &amp; Penghematan</h3>
+
+          <div class="budget-row">
+            <span>Total Menu Terpilih</span>
+            <strong id="calcMenuCount">0 sesi makan</strong>
+          </div>
+          <div class="budget-row">
+            <span>Nilai Kotor Bahan Resep</span>
+            <strong id="calcGrossCost">Rp 0</strong>
+          </div>
+          <div class="budget-row highlight">
+            <span>Potongan Bahan Tersedia di Dapur</span>
+            <strong id="calcSavedFromStock">- Rp 0</strong>
+          </div>
+          <div class="budget-row">
+            <span>Cadangan Bumbu Dasar / Gas</span>
+            <strong id="calcExtraReserve">Rp 0</strong>
+          </div>
+
+          <div class="budget-total">
+            <span>Estimasi Belanja Baru</span>
+            <span style="color:var(--gold-400);" id="calcNetGrocery">Rp 0</span>
+          </div>
+
+          <div style="margin-top:12px;font-size:0.82rem;color:rgba(255,255,255,0.85);background:rgba(0,0,0,0.22);padding:12px;border-radius:10px;">
+            <div>Rata-rata per orang/hari: <strong id="calcPerPersonDay">Rp 0</strong></div>
+            <div style="margin-top:4px;">Bahan kritis terselamatkan: <strong id="calcCriticalSavedCount" style="color:var(--gold-400);">0 bahan</strong></div>
+            <div style="margin-top:4px;">Bahan kurang perlu dibeli: <strong id="calcMissingListCount">0 jenis</strong></div>
+          </div>
+
+          <div style="margin-top:16px;display:flex;flex-direction:column;gap:8px;">
+            <button type="button" class="btn btn-gold" id="btnExportMissingToShop">🛒 Masukkan Bahan Kurang ke Daftar Belanja</button>
+            <button type="button" class="btn btn-outline" style="background:transparent;color:#fff;border-color:rgba(255,255,255,0.3);" id="btnClearPlanner">Kosongkan Jadwal</button>
+          </div>
+          <p style="font-size:0.74rem;opacity:0.75;margin-top:12px;">*Seluruh angka harga merupakan estimasi simulasi referensi pasar rumah tangga.</p>
+        </aside>
+      </div>
+    </section>
+
+    <!-- SECTION 4: DAFTAR BELANJA OTOMATIS & MITRA PANGAN UMKM LOKAL -->
+    <section id="belanjaSection" style="border-bottom:none;">
+      <div class="section-header">
+        <div>
+          <span class="eyebrow" data-i18n="sec4Eyebrow">Belanja Cerdas &amp; Ekosistem Lokal</span>
+          <h2 class="section-title" data-i18n="sec4Title">Daftar Belanja Otomatis &amp; Mitra UMKM Pangan</h2>
+          <p class="section-sub" data-i18n="sec4Sub">Bahan yang habis atau kurang dari resep terkumpul otomatis di sini. Pesan ke mitra pedagang sayur &amp; UMKM lokal (Mode Demo) dengan transparansi status halal.</p>
+        </div>
+      </div>
+
+      <div class="market-layout">
+        <!-- Smart Shopping List -->
+        <div class="panel-card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+            <h3 style="color:var(--emerald-900);font-size:1.08rem;" data-i18n="shopListTitle">🛒 Daftar Belanja Saya</h3>
+            <button type="button" class="btn btn-danger btn-sm" id="btnClearCheckedShop">Hapus yang Dicentang</button>
+          </div>
+
+          <form id="formAddShopItem" style="display:flex;gap:8px;margin-bottom:14px;">
+            <input type="text" id="shopItemInput" class="input" placeholder="Tambah bahan belanja (mis. Wortel 500g)..." required />
+            <button type="submit" class="btn btn-primary">+ Tambah</button>
+          </form>
+
+          <div id="shoppingListContainer" style="max-height:380px;overflow-y:auto;"></div>
+        </div>
+
+        <!-- UMKM Local Food Partners -->
+        <div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
+            <h3 style="color:var(--emerald-900);font-size:1.08rem;" data-i18n="umkmCatalogTitle">Mitra Pedagang Pasar &amp; UMKM Pangan Lokal (Data Simulasi)</h3>
+            <select id="umkmHalalFilter" style="width:auto;">
+              <option value="ALL">Semua Status Verifikasi</option>
+              <option value="Tersertifikasi Halal Resmi (Simulasi)">Sertifikasi Halal Resmi (Simulasi)</option>
+              <option value="Bahan Segar Alami (Ramah Muslim)">Bahan Segar Alami (Non-Olahan)</option>
+              <option value="Belum Diverifikasi Resmi">Belum Diverifikasi Resmi</option>
+            </select>
+          </div>
+          <div class="cards-grid" id="umkmGrid"></div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer>
+    <div class="container" style="display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;">
+      <div style="max-width:560px;">
+        <div class="footer-brand-row">
+          <span class="footer-logo-wrap">
+            <img src="logo-dapurpintar.png" alt="Logo DapurPintar Smart Kitchen" />
+          </span>
+          <strong style="color:var(--gold-400);font-size:1.05rem;">DapurPintar — Smart Kitchen Prototype v2.0</strong>
+        </div>
+        <p style="margin-top:6px;">Aplikasi web pengelolaan stok dapur, rekomendasi resep anti-mubazir, perencanaan anggaran belanja ramah Muslim, serta sistem login dummy (<strong>User, Operator, Admin</strong>) dengan proteksi <strong>Halaman Dashboard</strong> khusus Operator &amp; Admin.</p>
+      </div>
+      <div style="text-align:right;">
+        <div>
+          <a href="login.html" style="color:var(--gold-400);font-weight:700;">🔐 Halaman Login</a> &nbsp;•&nbsp;
+          <a href="dashboard.html" style="color:var(--gold-400);font-weight:700;">📊 Halaman Dashboard</a>
+        </div>
+        <div style="margin-top:6px;opacity:0.78;">Penyimpanan: <strong>Browser localStorage Aktif</strong></div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Modal Detail Resep / WhatsApp Demo / Tambah Stok Cepat -->
+  <div class="modal-backdrop" id="appModal" role="dialog" aria-modal="true">
+    <div class="modal-content">
+      <button type="button" class="modal-close" onclick="closeModal()" aria-label="Tutup">✕</button>
+      <div id="modalBody"></div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div class="toast" id="appToast" role="status" aria-live="polite"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>
